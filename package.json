@@ -1,0 +1,41 @@
+{
+  "name": "@galaxy-stack/orbit-cli",
+  "version": "0.1.7",
+  "description": "Orbit CLI - scaffolding and code generation for the Orbit framework",
+  "bin": {
+    "orbit": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir ./dist --target bun --external reflect-metadata",
+    "dev": "bun --watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "build:types": "bash ../../scripts/build-types.sh cli",
+    "changeset": "changeset"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "chalk": "^5.0.0",
+    "ora": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0",
+    "reflect-metadata": "^0.2.2",
+    "@changesets/cli": "^2.27.0"
+  },
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galaxy-orbit/orbit-cli.git"
+  },
+  "homepage": "https://github.com/galaxy-orbit/orbit#readme",
+  "bugs": {
+    "url": "https://github.com/galaxy-orbit/orbit-cli/issues"
+  }
+}
