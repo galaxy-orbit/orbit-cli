@@ -57,7 +57,17 @@ app.post('/users', async (c) => {
   return c.json({ id: Date.now(), ...body });
 });
 
-app.get('/db/users/:id', (c) => c.json(db.prepare('SELECT * FROM users WHERE id = ?').get(Number(c.req.param('id')))));
+const getUserStmt = db.prepare('SELECT * FROM users WHERE id = ?');
+const listUsersStmt = db.prepare('SELECT id, name, email, age FROM users LIMIT 50');
+const insertUserStmt = db.prepare('INSERT INTO users (name, email, age) VALUES (?, ?, ?)');
+
+app.get('/db/users', (c) => c.json(listUsersStmt.all()));
+app.post('/db/users', async (c) => {
+  const { name, email, age } = await c.req.json();
+  const info = insertUserStmt.run(name, email, age);
+  return c.json({ id: Number(info.lastInsertRowid), name, email, age });
+});
+app.get('/db/users/:id', (c) => c.json(getUserStmt.get(Number(c.req.param('id')))));
 
 export default {
   port: 3003,

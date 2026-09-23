@@ -1,0 +1,86 @@
+[
+  {
+    "framework": "Orbit",
+    "scenario": "db-sqlite",
+    "requestsPerSec": 32556.8,
+    "latencyAvg": 0.03,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 15,
+    "throughput": 2702745.6,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Elysia",
+    "scenario": "db-sqlite",
+    "requestsPerSec": 38142.4,
+    "latencyAvg": 0.02,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 14,
+    "throughput": 2860851.2,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Hono",
+    "scenario": "db-sqlite",
+    "requestsPerSec": 31480,
+    "latencyAvg": 0.03,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 15,
+    "throughput": 3494502.4,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Fastify",
+    "scenario": "db-sqlite",
+    "requestsPerSec": 27512,
+    "latencyAvg": 0.02,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 12,
+    "throughput": 3383910.4,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Express",
+    "scenario": "db-sqlite",
+    "requestsPerSec": 18449.6,
+    "latencyAvg": 0.06,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 12,
+    "throughput": 3542016,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "NestJS Express",
+    "scenario": "db-sqlite",
+    "requestsPerSec": 15421.6,
+    "latencyAvg": 0.12,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 14,
+    "throughput": 2235801.6,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "NestJS Fastify",
+    "scenario": "db-sqlite",
+    "requestsPerSec": 24043.2,
+    "latencyAvg": 0.02,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 13,
+    "throughput": 2957107.2,
+    "errors": 0,
+    "timeouts": 0
+  }
+]

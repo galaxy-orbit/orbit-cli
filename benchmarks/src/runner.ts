@@ -114,6 +114,18 @@ const scenarios: ScenarioConfig[] = [
     path: '/db/users/123',
     method: 'GET',
   },
+  {
+    name: 'db-list',
+    path: '/db/users',
+    method: 'GET',
+  },
+  {
+    name: 'db-insert',
+    path: '/db/users',
+    method: 'POST',
+    body: { name: 'John Doe', email: 'john@example.com', age: 30 },
+    headers: { 'Content-Type': 'application/json' },
+  },
 ];
 
 async function runAutocannon(
@@ -214,6 +226,7 @@ async function main() {
   const connections = parseInt(args.find(a => a.startsWith('--connections='))?.split('=')[1] || '10');
   const duration = parseInt(args.find(a => a.startsWith('--duration='))?.split('=')[1] || '10');
   const scenarioFilter = args.find(a => a.startsWith('--scenario='))?.split('=')[1];
+  const runs = parseInt(args.find(a => a.startsWith('--runs='))?.split('=')[1] || '1');
 
   console.log('\n🚀 Orbit Benchmark Suite\n');
   console.log(`Connections: ${connections}`);
@@ -261,9 +274,17 @@ async function main() {
     coldStarts.push({ framework: framework.name, coldStart, rss });
 
     for (const scenario of filteredScenarios) {
-      const result = await runBenchmark(framework, scenario, { connections, duration });
-      if (result) {
-        results.push(result);
+      let best: BenchmarkResult | null = null;
+      for (let i = 0; i < runs; i++) {
+        const result = await runBenchmark(framework, scenario, { connections, duration });
+        if (result && (!best || result.requestsPerSec > best.requestsPerSec)) {
+          best = result;
+        }
+        if (runs > 1 && i < runs - 1) await Bun.sleep(500);
+      }
+      if (best) {
+        results.push(best);
+        console.log(`     ✓ ${best.requestsPerSec.toLocaleString()} req/s (best of ${runs})`);
       }
     }
 

@@ -10,6 +10,8 @@ for (let i = 1; i <= 100; i++) {
   seedStmt.run(i, `User ${i}`, `user${i}@example.com`, 20 + (i % 50));
 }
 const getUserStmt = db.prepare('SELECT * FROM users WHERE id = ?');
+const listUsersStmt = db.prepare('SELECT id, name, email, age FROM users LIMIT 50');
+const insertUserStmt = db.prepare('INSERT INTO users (name, email, age) VALUES (?, ?, ?)');
 
 @Controller()
 class BenchController {
@@ -60,9 +62,20 @@ class BenchController {
     return { id: Date.now(), ...body };
   }
 
+  @Get('db/users')
+  listUsersFromDb() {
+    return listUsersStmt.all();
+  }
+
   @Get('db/users/:id')
   getUserFromDb(@Param('id') id: string) {
     return getUserStmt.get(Number(id));
+  }
+
+  @Post('db/users')
+  insertUserToDb(@Body() body: any) {
+    const info = insertUserStmt.run(body.name, body.email, body.age);
+    return { id: Number(info.lastInsertRowid), name: body.name, email: body.email, age: body.age };
   }
 }
 

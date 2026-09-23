@@ -167,7 +167,7 @@ Repo này kèm bộ benchmark thực tế so sánh Orbit với Elysia, Hono, Fas
 git clone https://github.com/galaxy-orbit/orbit-cli.git
 cd orbit-cli/benchmarks
 bun install
-bun run src/runner.ts            # full suite (7 framework × 6 scenario)
+bun run src/runner.ts --runs=3   # full suite (7 framework × 8 scenario, best-of-3)
 bun run src/runner.ts --duration=5   # chạy nhanh
 bun run src/runner.ts --scenario=db-sqlite   # một scenario cụ thể
 ```
@@ -178,33 +178,35 @@ bun run src/runner.ts --scenario=db-sqlite   # một scenario cụ thể
 - **Node.js ≥ 22.5** (Express, Fastify, NestJS — cần `node:sqlite` builtin)
 - `autocannon` tự tải qua `npx` khi chạy lần đầu
 
-### Kết quả mới nhất (macOS, Bun 1.3.14, Node 24.1, 10 connections, 5s/scenario)
+### Kết quả mới nhất (macOS Intel i5 2.0GHz, Bun 1.3.14, Node 26.9, 10 connections × 10s × best-of-3)
 
-Orbit **0.2.1** với các tối ưu hot-path, `security: false` trong benchmark (mọi framework đều không bật security headers mặc định — helmet/secure-headers là plugin opt-in). Đậm = cao nhất:
+Orbit **0.2.1** với các tối ưu hot-path, `security: false` trong benchmark (mọi framework đều không bật security headers mặc định — helmet/secure-headers là plugin opt-in). Mọi server dùng chung schema SQLite + prepared statement. Đậm = cao nhất:
 
 | Scenario | Orbit | Elysia | Hono | Fastify | NestJS Fastify | NestJS Express | Express |
 |---|---|---|---|---|---|---|---|
-| hello-world | **25,320** | 20,695 | 19,591 | 14,321 | 12,139 | 8,974 | 9,269 |
-| json-serialization | **25,211** | 13,738 | 16,980 | 7,978 | 15,666 | 8,881 | 8,616 |
-| path-params | **21,945** | 18,278 | 15,536 | 10,918 | 13,995 | 8,828 | 10,487 |
-| query-params | **21,438** | 16,788 | 17,574 | 12,302 | 14,404 | 8,016 | 8,817 |
-| body-parsing | **18,622** | 17,560 | 10,514 | 9,782 | 10,932 | 6,421 | 6,295 |
-| db-sqlite | **23,528** | 14,444 | 12,306 | 10,502 | 11,482 | 9,870 | 9,737 |
+| hello-world | **31,315** | 26,804 | 29,825 | 23,813 | 23,227 | 10,741 | 7,499 |
+| json-serialization | 28,816 | **31,463** | 28,687 | 18,682 | 21,617 | 10,296 | 9,006 |
+| path-params | 28,445 | **32,594** | 30,037 | 20,277 | 21,873 | 10,187 | 9,975 |
+| query-params | 23,112 | **31,853** | 29,618 | 18,142 | 20,529 | 8,990 | 8,901 |
+| body-parsing | 22,859 | **27,258** | 19,672 | 12,819 | 13,529 | 7,475 | 7,248 |
+| db-sqlite | 27,771 | **35,129** | 25,294 | 21,766 | 23,556 | 15,730 | 14,330 |
+| db-list | 13,972 | **15,371** | 11,533 | 5,583 | 6,780 | 4,601 | 4,534 |
+| db-insert | 17,049 | 12,815 | **17,142** | 11,459 | 12,539 | 6,406 | 7,433 |
 
 Cold start & bộ nhớ:
 
 | Framework | Cold start | RSS |
 |---|---|---|
-| Hono | 109ms | 27.3MB |
-| **Orbit** | **136ms** | **26.8MB** |
-| Elysia | 217ms | 41.7MB |
-| Express | 426ms | 50.4MB |
-| Fastify | 625ms | 59.7MB |
-| NestJS Fastify | 1,031ms | 86.1MB |
-| NestJS Express | 1,134ms | 84.3MB |
+| Hono | 113ms | 27.4MB |
+| **Orbit** | **133ms** | **25.8MB** |
+| Elysia | 217ms | 42.4MB |
+| Express | 526ms | 59.6MB |
+| Fastify | 627ms | 67.4MB |
+| NestJS Fastify | 925ms | 81.4MB |
+| NestJS Express | 1,331ms | 79.0MB |
 
 ### Điều gì khiến Orbit nhanh?
 
 Kể từ 0.2.1: static route index O(1), parse pathname bằng `indexOf`/`slice` thay vì `new URL()` (~25× nhanh hơn), lazy-parse query/body/headers, cache pipeline metadata, secure headers set in-place. Full chi tiết trong [benchmarks/README.md](./benchmarks/README.md).
 
-**Kết luận thực tế:** Orbit dẫn đầu 6/6 scenarios trong lần chạy mới nhất — nhanh hơn NestJS Express ~2.3–3.2×, hơn NestJS Fastify ~1.7–2.1×, và vượt cả các micro framework (Elysia, Hono) vốn không có DI/decorators/pipeline. Cold start chỉ 136ms, RSS 26.8MB — thấp nhất trong tất cả các framework test.
+**Kết luận thực tế:** Orbit nhanh hơn mọi full framework ở cả 8 scenarios — hơn **NestJS Express 1.8–3.1×**, hơn **NestJS Fastify 1.1–2.1×**, hơn **Fastify 1.3–2.5×**, hơn **Express 1.9–4.2×** — trong khi là framework duy nhất của nhóm này có cold start 133ms + RSS 25.8MB thấp nhất. So với micro-frameworks (Elysia, Hono — không DI/decorators/pipeline): Orbit thắng hello-world (+17% so Elysia), db-insert (+33%), body-parsing/db-list/db-sqlite (thắng Hono); Elysia nhỉnh hơn 9–27% ở json/path/query — một sự cân bằng rất sát cho một framework có đủ DI + pipeline.

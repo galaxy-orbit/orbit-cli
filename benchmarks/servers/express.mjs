@@ -8,6 +8,10 @@ for (let i = 1; i <= 100; i++) {
   db.prepare('INSERT INTO users (id, name, email, age) VALUES (?, ?, ?, ?)').run(i, `User ${i}`, `user${i}@example.com`, 20 + (i % 50));
 }
 
+const getUserStmt = db.prepare('SELECT * FROM users WHERE id = ?');
+const listUsersStmt = db.prepare('SELECT id, name, email, age FROM users LIMIT 50');
+const insertUserStmt = db.prepare('INSERT INTO users (name, email, age) VALUES (?, ?, ?)');
+
 const app = express();
 app.use(express.json());
 
@@ -62,9 +66,18 @@ app.post('/users', (req, res) => {
   res.json({ id: Date.now(), ...req.body });
 });
 
+app.get('/db/users', (req, res) => {
+  res.json(listUsersStmt.all());
+});
+
+app.post('/db/users', (req, res) => {
+  const { name, email, age } = req.body;
+  const info = insertUserStmt.run(name, email, age);
+  res.json({ id: Number(info.lastInsertRowid), name, email, age });
+});
+
 app.get('/db/users/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM users WHERE id = ?').get(Number(req.params.id));
-  res.json(row);
+  res.json(getUserStmt.get(Number(req.params.id)));
 });
 
 app.listen(3005, () => {

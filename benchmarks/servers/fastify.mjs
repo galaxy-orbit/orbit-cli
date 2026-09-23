@@ -7,6 +7,10 @@ for (let i = 1; i <= 100; i++) {
   db.prepare('INSERT INTO users (id, name, email, age) VALUES (?, ?, ?, ?)').run(i, `User ${i}`, `user${i}@example.com`, 20 + (i % 50));
 }
 
+const getUserStmt = db.prepare('SELECT * FROM users WHERE id = ?');
+const listUsersStmt = db.prepare('SELECT id, name, email, age FROM users LIMIT 50');
+const insertUserStmt = db.prepare('INSERT INTO users (name, email, age) VALUES (?, ?, ?)');
+
 const app = Fastify({ logger: false });
 
 app.get('/', async () => ({ message: 'Hello World!' }));
@@ -54,9 +58,16 @@ app.post('/users', async (request) => {
   return { id: Date.now(), ...request.body };
 });
 
+app.get('/db/users', async () => listUsersStmt.all());
+
+app.post('/db/users', async (request, reply) => {
+  const { name, email, age } = request.body;
+  const info = insertUserStmt.run(name, email, age);
+  reply.send({ id: Number(info.lastInsertRowid), name, email, age });
+});
+
 app.get('/db/users/:id', (request, reply) => {
-  const row = db.prepare('SELECT * FROM users WHERE id = ?').get(Number(request.params.id));
-  reply.send(row);
+  reply.send(getUserStmt.get(Number(request.params.id)));
 });
 
 await app.listen({ port: 3004 });

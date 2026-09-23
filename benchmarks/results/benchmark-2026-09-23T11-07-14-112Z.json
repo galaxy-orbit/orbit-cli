@@ -1,0 +1,86 @@
+[
+  {
+    "framework": "Orbit",
+    "scenario": "hello-world",
+    "requestsPerSec": 32624,
+    "latencyAvg": 0.03,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 17,
+    "throughput": 4370841.6,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Elysia",
+    "scenario": "hello-world",
+    "requestsPerSec": 34456,
+    "latencyAvg": 0.02,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 14,
+    "throughput": 5099110.41,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Hono",
+    "scenario": "hello-world",
+    "requestsPerSec": 33768,
+    "latencyAvg": 0.02,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 13,
+    "throughput": 4525056,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Fastify",
+    "scenario": "hello-world",
+    "requestsPerSec": 26801.6,
+    "latencyAvg": 0.01,
+    "latencyP50": 0,
+    "latencyP99": 0,
+    "latencyMax": 13,
+    "throughput": 5280153.6,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "Express",
+    "scenario": "hello-world",
+    "requestsPerSec": 12680.8,
+    "latencyAvg": 0.19,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 15,
+    "throughput": 3309772.8,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "NestJS Express",
+    "scenario": "hello-world",
+    "requestsPerSec": 11768.8,
+    "latencyAvg": 0.2,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 13,
+    "throughput": 3071795.2,
+    "errors": 0,
+    "timeouts": 0
+  },
+  {
+    "framework": "NestJS Fastify",
+    "scenario": "hello-world",
+    "requestsPerSec": 23048,
+    "latencyAvg": 0.02,
+    "latencyP50": 0,
+    "latencyP99": 1,
+    "latencyMax": 13,
+    "throughput": 4539596.8,
+    "errors": 0,
+    "timeouts": 0
+  }
+]

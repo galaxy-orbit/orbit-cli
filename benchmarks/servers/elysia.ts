@@ -7,6 +7,10 @@ for (let i = 1; i <= 100; i++) {
   db.prepare('INSERT INTO users (id, name, email, age) VALUES (?, ?, ?, ?)').run(i, `User ${i}`, `user${i}@example.com`, 20 + (i % 50));
 }
 
+const getUserStmt = db.prepare('SELECT * FROM users WHERE id = ?');
+const listUsersStmt = db.prepare('SELECT id, name, email, age FROM users LIMIT 50');
+const insertUserStmt = db.prepare('INSERT INTO users (name, email, age) VALUES (?, ?, ?)');
+
 const app = new Elysia()
   .get('/', () => ({ message: 'Hello World!' }))
   .get('/health', () => ({ status: 'ok' }))
@@ -39,7 +43,13 @@ const app = new Elysia()
     limit: parseInt(query.limit as string || '10'),
   }))
   .post('/users', ({ body }) => ({ id: Date.now(), ...(body as object) }))
-  .get('/db/users/:id', ({ params }) => db.prepare('SELECT * FROM users WHERE id = ?').get(Number(params.id)))
+  .get('/db/users', () => listUsersStmt.all())
+  .post('/db/users', ({ body }) => {
+    const { name, email, age } = body as any;
+    const info = insertUserStmt.run(name, email, age);
+    return { id: Number(info.lastInsertRowid), name, email, age };
+  })
+  .get('/db/users/:id', ({ params }) => getUserStmt.get(Number(params.id)))
   .listen(3002);
 
 console.log('Elysia server running on port 3002');
