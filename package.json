@@ -1,6 +1,6 @@
 {
   "name": "@galaxy-stack/orbit-cli",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Orbit CLI - scaffolding and code generation for the Orbit framework",
   "bin": {
     "orbit": "./dist/index.js"
