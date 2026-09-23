@@ -54,13 +54,13 @@ describe('newProjectCommand — scaffolding', () => {
     const root = mkdtempSync(join(tmpdir(), 'orbit-new-'));
     roots.push(root);
 
-    const originalCwd = process.cwd();
+    const prevCwd = process.cwd();
     process.chdir(root);
     try {
       await newProjectCommand('default-dir-app', { skipInstall: true });
       expect(existsSync(join(root, 'default-dir-app', 'src', 'main.ts'))).toBe(true);
     } finally {
-      process.chdir(originalCwd);
+      process.chdir(prevCwd);
     }
   }, 30000);
 });
