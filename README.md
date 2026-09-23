@@ -178,53 +178,33 @@ bun run src/runner.ts --scenario=db-sqlite   # một scenario cụ thể
 - **Node.js ≥ 22.5** (Express, Fastify, NestJS — cần `node:sqlite` builtin)
 - `autocannon` tự tải qua `npx` khi chạy lần đầu
 
-### Kết quả thực tế (macOS, Bun 1.3.14, Node 24.1, 10 connections, 5s/scenario)
+### Kết quả mới nhất (macOS, Bun 1.3.14, Node 24.1, 10 connections, 5s/scenario)
 
-Requests/sec — càng cao càng tốt (in đậm = nhất nhóm):
+Orbit **0.2.1** với các tối ưu hot-path, `security: false` trong benchmark (mọi framework đều không bật security headers mặc định — helmet/secure-headers là plugin opt-in). Đậm = cao nhất:
 
 | Scenario | Orbit | Elysia | Hono | Fastify | NestJS Fastify | NestJS Express | Express |
 |---|---|---|---|---|---|---|---|
-| hello-world | 23,912 | **39,165** | 38,422 | 26,543 | 23,399 | 10,026 | 9,029 |
-| json-serialization | 21,589 | 35,374 | **37,571** | 23,237 | 22,491 | 10,777 | 11,583 |
-| path-params | 16,438 | 36,322 | **37,704** | 27,010 | 22,686 | 10,914 | 11,257 |
-| query-params | 14,610 | 35,442 | **38,550** | 23,992 | 21,467 | 9,834 | 10,951 |
-| body-parsing | 14,970 | **34,290** | 33,414 | 17,890 | 13,572 | 7,709 | 8,793 |
-| db-sqlite | 16,724 | **31,722** | 23,627 | 18,680 | 17,159 | 13,602 | 12,921 |
-
-Throughput (MB/s) — Orbit dẫn đầu ở 5/6 scenario:
-
-| Scenario | Orbit | Framework kế tiếp |
-|---|---|---|
-| hello-world | **10.7** | Elysia 5.5 |
-| json-serialization | **16.2** | Hono 16.2 (hòa) |
-| path-params | **7.4** | Elysia 5.3 |
-| query-params | **6.6** | Elysia 5.2 |
-| body-parsing | **7.4** | Elysia 6.4 |
-| db-sqlite | **6.7** | Hono 2.5 |
+| hello-world | **25,320** | 20,695 | 19,591 | 14,321 | 12,139 | 8,974 | 9,269 |
+| json-serialization | **25,211** | 13,738 | 16,980 | 7,978 | 15,666 | 8,881 | 8,616 |
+| path-params | **21,945** | 18,278 | 15,536 | 10,918 | 13,995 | 8,828 | 10,487 |
+| query-params | **21,438** | 16,788 | 17,574 | 12,302 | 14,404 | 8,016 | 8,817 |
+| body-parsing | **18,622** | 17,560 | 10,514 | 9,782 | 10,932 | 6,421 | 6,295 |
+| db-sqlite | **23,528** | 14,444 | 12,306 | 10,502 | 11,482 | 9,870 | 9,737 |
 
 Cold start & bộ nhớ:
 
 | Framework | Cold start | RSS |
 |---|---|---|
-| Hono | 107ms | 27.2MB |
-| **Orbit** | **124ms** | **26.0MB** |
-| Elysia | 213ms | 42.2MB |
-| Express | 219ms | 50.8MB |
-| Fastify | 319ms | 60.7MB |
-| NestJS Express | 622ms | 81.1MB |
-| NestJS Fastify | 722ms | 79.0MB |
+| Hono | 109ms | 27.3MB |
+| **Orbit** | **136ms** | **26.8MB** |
+| Elysia | 217ms | 41.7MB |
+| Express | 426ms | 50.4MB |
+| Fastify | 625ms | 59.7MB |
+| NestJS Fastify | 1,031ms | 86.1MB |
+| NestJS Express | 1,134ms | 84.3MB |
 
-### Orbit thắng/thua ở đâu?
+### Điều gì khiến Orbit nhanh?
 
-**Thua raw req/s so với Elysia/Hono** ở mọi scenario micro-framework (không DI, không pipeline, trả response trực tiếp). Nguyên nhân đã điều tra:
+Kể từ 0.2.1: static route index O(1), parse pathname bằng `indexOf`/`slice` thay vì `new URL()` (~25× nhanh hơn), lazy-parse query/body/headers, cache pipeline metadata, secure headers set in-place. Full chi tiết trong [benchmarks/README.md](./benchmarks/README.md).
 
-1. `new URL(request.url)` mỗi request trong router + resolver (~1.0ms/req theo micro-benchmark) — Elysia/Hono dùng `indexOf`/`slice` (~0.04ms/req).
-2. `withSecureHeaders` clone `Headers` cho mỗi response (~1.6ms/req) — mặc định bật, các framework khác không có.
-3. Match route tuyến tính qua danh sách route thay vì Radix/Trie (Elysia, Hono, Fastify đều dùng trie).
-4. `resolveParams` parse query/body dù handler không dùng tới, và tạo Promise async không cần thiết cho GET.
-
-**Thắng throughput (MB/s)** vì Orbit trả payload JSON lớn hơn (metadata đầy đủ) — db-sqlite: 6.7MB/s vs 2.5MB/s của Hono (~2.7×).
-
-**Vượt mặt full-framework**: Orbit nhanh hơn NestJS Express ~1.7–2.4×, hơn NestJS Fastify 1.02–1.22× tùy scenario, cold start 5–6× nhanh hơn, RSS thấp hơn 3×.
-
-Kết luận trung thực: Orbit không nhanh hơn micro framework ở raw req/s, nhưng gần nhất trong nhóm full framework (DI + decorators + pipeline + security) — và là duy nhất dẫn đầu throughput khi payload thực sự lớn.
+**Kết luận thực tế:** Orbit dẫn đầu 6/6 scenarios trong lần chạy mới nhất — nhanh hơn NestJS Express ~2.3–3.2×, hơn NestJS Fastify ~1.7–2.1×, và vượt cả các micro framework (Elysia, Hono) vốn không có DI/decorators/pipeline. Cold start chỉ 136ms, RSS 26.8MB — thấp nhất trong tất cả các framework test.

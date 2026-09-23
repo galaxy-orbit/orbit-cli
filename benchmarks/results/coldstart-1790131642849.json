@@ -1,0 +1,37 @@
+[
+  {
+    "framework": "Orbit",
+    "coldStart": 260,
+    "rss": 26612
+  },
+  {
+    "framework": "Elysia",
+    "coldStart": 228,
+    "rss": 41532
+  },
+  {
+    "framework": "Hono",
+    "coldStart": 114,
+    "rss": 27156
+  },
+  {
+    "framework": "Fastify",
+    "coldStart": 624,
+    "rss": 59308
+  },
+  {
+    "framework": "Express",
+    "coldStart": 426,
+    "rss": 50224
+  },
+  {
+    "framework": "NestJS Express",
+    "coldStart": 1433,
+    "rss": 78036
+  },
+  {
+    "framework": "NestJS Fastify",
+    "coldStart": 1028,
+    "rss": 84696
+  }
+]

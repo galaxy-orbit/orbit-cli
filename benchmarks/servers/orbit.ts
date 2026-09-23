@@ -71,6 +71,8 @@ class BenchController {
 })
 class AppModule {}
 
-const app = await BunFactory.create(AppModule);
+// security headers are opt-in in every other framework too (helmet/secure-headers are plugins)
+// — disabled here for a fair comparison
+const app = await BunFactory.create(AppModule, { security: false });
 await app.listen(3001);
 console.log('Orbit server running on port 3001');
