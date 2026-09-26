@@ -29,7 +29,7 @@ describe('newProjectCommand — scaffolding', () => {
     roots.push(root);
 
     const projectDir = join(root, 'my-app');
-    await newProjectCommand('my-app', { directory: projectDir, skipInstall: true });
+    await newProjectCommand('my-app', { directory: projectDir, skipInstall: true, orbitVersions: { core: '^0.2.1', common: '^0.1.14' } });
 
     expect(existsSync(join(projectDir, 'package.json'))).toBe(true);
     expect(existsSync(join(projectDir, 'tsconfig.json'))).toBe(true);
@@ -48,6 +48,9 @@ describe('newProjectCommand — scaffolding', () => {
     const pkg = JSON.parse(readFileSync(join(projectDir, 'package.json'), 'utf-8'));
     expect(pkg.name).toBe('my-app');
     expect(Object.keys(pkg.dependencies ?? {})).toContain('@galaxy-stack/orbit-core');
+    // Scaffolded projects must install Orbit releases that ship type declarations.
+    expect(pkg.dependencies['@galaxy-stack/orbit-core']).toMatch(/^\^0\.2\./);
+    expect(pkg.dependencies['@galaxy-stack/orbit-common']).toMatch(/^\^0\.1\.1[0-9]/);
   }, 30000);
 
   test('default directory is the project name', async () => {
@@ -57,7 +60,7 @@ describe('newProjectCommand — scaffolding', () => {
     const prevCwd = process.cwd();
     process.chdir(root);
     try {
-      await newProjectCommand('default-dir-app', { skipInstall: true });
+      await newProjectCommand('default-dir-app', { skipInstall: true, orbitVersions: { core: '^0.2.1', common: '^0.1.14' } });
       expect(existsSync(join(root, 'default-dir-app', 'src', 'main.ts'))).toBe(true);
     } finally {
       process.chdir(prevCwd);

@@ -2,10 +2,13 @@ import { mkdir, writeFile, exists } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
+import { resolveOrbitVersions, type OrbitVersions } from '../utils/orbit-versions';
 
 export interface NewProjectOptions {
   directory?: string;
   skipInstall?: boolean;
+  /** Skip the registry lookup (tests/offline). Defaults to the pinned ranges. */
+  orbitVersions?: OrbitVersions;
 }
 
 export async function newProjectCommand(
@@ -25,7 +28,8 @@ export async function newProjectCommand(
     await mkdir(projectDir, { recursive: true });
     await mkdir(join(projectDir, 'src'), { recursive: true });
     
-    await writeFile(join(projectDir, 'package.json'), packageJsonTemplate(name));
+    const versions = options.orbitVersions ?? await resolveOrbitVersions();
+    await writeFile(join(projectDir, 'package.json'), packageJsonTemplate(name, versions));
     await writeFile(join(projectDir, 'tsconfig.json'), tsconfigTemplate());
     await writeFile(join(projectDir, 'src/main.ts'), mainTemplate());
     await writeFile(join(projectDir, 'src/app.module.ts'), appModuleTemplate());
@@ -69,7 +73,7 @@ export async function newProjectCommand(
   }
 }
 
-function packageJsonTemplate(name: string): string {
+function packageJsonTemplate(name: string, versions: OrbitVersions): string {
   return JSON.stringify({
     name,
     version: '0.0.1',
@@ -81,10 +85,10 @@ function packageJsonTemplate(name: string): string {
       test: 'bun test',
     },
     dependencies: {
-      // scaffolded projects live OUTSIDE this monorepo — pin the published
-      // npm ranges instead of workspace protocol
-      '@galaxy-stack/orbit-core': '^0.1.0',
-      '@galaxy-stack/orbit-common': '^0.1.0',
+      // Scaffolded projects live OUTSIDE this monorepo. Ranges come from the
+      // registry (resolveOrbitVersions) with a pinned fallback, never a stale literal.
+      '@galaxy-stack/orbit-core': versions.core,
+      '@galaxy-stack/orbit-common': versions.common,
       'reflect-metadata': '^0.2.2',
     },
     devDependencies: {
